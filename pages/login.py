@@ -1,5 +1,7 @@
 import streamlit as st
 from db import save_user
+st.set_page_config(page_title="Login")
+
 
 from core.auth import login_user, signup_user, logout_user
 
