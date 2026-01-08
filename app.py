@@ -8,7 +8,8 @@ import os
 # Redirect if not logged in
 # ---------------------------------------------
 if "user" not in st.session_state or st.session_state["user"] is None:
-    st.switch_page("Login")
+    st.switch_page("pages/login.py")
+
 
 
 
