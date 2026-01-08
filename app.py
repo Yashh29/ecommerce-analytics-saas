@@ -16,7 +16,8 @@ st.set_page_config(
 # Redirect if not logged in
 # ---------------------------------------------
 if "user" not in st.session_state or st.session_state["user"] is None:
-    st.switch_page("login")
+    st.switch_page("pages/login.py")
+
 
 
 # ---------------------------------------------
@@ -257,4 +258,5 @@ st.write("© 2025/26 — Yash Modi")
 
 if st.button("Logout"):
     del st.session_state["user"]
-    st.switch_page("login")
+    st.switch_page("pages/login.py")
+
