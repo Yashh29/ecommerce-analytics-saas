@@ -1,13 +1,20 @@
 from google.cloud import firestore
 
+
+# ---------------------------------------------
+# GET FIRESTORE CLIENT
+# ---------------------------------------------
 def get_db():
-    """Authenticate using service account and return DB client."""
+    """
+    Authenticate using the service account key.
+    The key must be at project root: /ServiceAccountKey.json
+    """
     return firestore.Client.from_service_account_json("ServiceAccountKey.json")
 
 
-# ---------------------------
+# ---------------------------------------------
 # USERS COLLECTION
-# ---------------------------
+# ---------------------------------------------
 def save_user(email, provider="password"):
     db = get_db()
     users = db.collection("users").document(email)
@@ -21,13 +28,14 @@ def save_user(email, provider="password"):
 
 def get_user(email):
     db = get_db()
-    users = db.collection("users").document(email)
-    return users.get().to_dict()
+    ref = db.collection("users").document(email)
+    doc = ref.get()
+    return doc.to_dict() if doc.exists else None
 
 
-# ---------------------------
-# DATASET METADATA COLLECTION
-# ---------------------------
+# ---------------------------------------------
+# DATASET METADATA
+# ---------------------------------------------
 def save_dataset_metadata(email, filename, processed=False):
     db = get_db()
     collection = db.collection("datasets")
@@ -44,13 +52,13 @@ def get_user_datasets(email):
     db = get_db()
     collection = db.collection("datasets")
 
-    query = collection.where("email", "==", email).stream()
-    return [doc.to_dict() for doc in query]
+    docs = collection.where("email", "==", email).stream()
+    return [doc.to_dict() for doc in docs]
 
 
-# ---------------------------
-# JOB / PIPELINE TRACKING
-# ---------------------------
+# ---------------------------------------------
+# PROCESSING JOB TRACKING
+# ---------------------------------------------
 def create_processing_job(email, status="pending"):
     db = get_db()
     jobs = db.collection("processing_jobs")
@@ -61,6 +69,7 @@ def create_processing_job(email, status="pending"):
         "status": status,
         "timestamp": firestore.SERVER_TIMESTAMP
     })
+
     return job_ref.id
 
 

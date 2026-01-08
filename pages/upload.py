@@ -1,30 +1,37 @@
 import streamlit as st
 import pandas as pd
 from firebase_admin import storage
-from firebase_admin import firestore
-from core.db import save_dataset_metadata   # NEW
+from core.db import save_dataset_metadata
 import uuid
 
+# ---------------------------------------------
 # Redirect if not logged in
+# ---------------------------------------------
 if "user" not in st.session_state or st.session_state["user"] is None:
-    st.switch_page("app_auth.py")
+    st.switch_page("pages/login.py")
 
 
+# ---------------------------------------------
+# Upload Function
+# ---------------------------------------------
 def upload_user_file(user_email):
     st.title("📤 Upload Your E-Commerce Data")
 
-    uploaded_file = st.file_uploader("Upload Orders CSV (orders.csv only)", type=["csv"])
+    uploaded_file = st.file_uploader(
+        "Upload Orders CSV (orders.csv only)",
+        type=["csv"]
+    )
 
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
-
         st.success("File uploaded successfully!")
 
         # ---------------------------------------------
-        # Upload raw CSV to Firebase Storage
+        # Upload raw CSV → Firebase Storage
         # ---------------------------------------------
         bucket = storage.bucket()
         blob = bucket.blob(f"{user_email}/raw/orders.csv")
+
         blob.upload_from_string(
             uploaded_file.getvalue(),
             content_type='text/csv'
@@ -33,21 +40,21 @@ def upload_user_file(user_email):
         st.info("Your file has been securely saved to cloud storage.")
 
         # ---------------------------------------------
-        # Save metadata in Firestore
+        # Store metadata in Firestore
         # ---------------------------------------------
         save_dataset_metadata(
             email=user_email,
             filename="orders.csv",
-            processed=False       # not processed yet
+            processed=False
         )
 
-        st.success("Metadata saved to your SaaS user workspace.")
+        st.success("Metadata saved to your SaaS workspace.")
 
         return df
 
     return None
 
 
-# MAIN CALL (Streamlit page)
+# MAIN EXECUTION
 user_email = st.session_state["user"]
 upload_user_file(user_email)
