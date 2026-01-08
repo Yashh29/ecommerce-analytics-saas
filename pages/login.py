@@ -1,5 +1,5 @@
 import streamlit as st
-st.set_page_config(page_title="login")
+st.set_page_config(page_title="Login")
 
 from db import save_user
 
