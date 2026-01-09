@@ -4,19 +4,10 @@ import matplotlib.pyplot as plt
 from google.cloud import storage
 import os
 
-# ---------------------------------------------
-# Page Configuration
-# ---------------------------------------------
-st.set_page_config(
-    page_title="Enterprise E-Commerce Analytics Dashboard",
-    layout="wide"
-)
-
-# ---------------------------------------------
 # Redirect if not logged in
-# ---------------------------------------------
 if "user" not in st.session_state or st.session_state["user"] is None:
-    st.switch_page("pages/login.py")
+    st.switch_page("login")
+
 
 
 

@@ -6,4 +6,5 @@ matplotlib
 firebase-admin
 google-cloud-storage
 google-cloud-firestore
+firebase-admin==6.2.0
 
