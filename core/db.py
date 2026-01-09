@@ -1,15 +1,16 @@
+import streamlit as st
 from google.cloud import firestore
 
 
 # ---------------------------------------------
-# GET FIRESTORE CLIENT
+# GET FIRESTORE CLIENT (using Streamlit Secrets)
 # ---------------------------------------------
 def get_db():
     """
-    Authenticate using the service account key.
-    The key must be at project root: /ServiceAccountKey.json
+    Create Firestore client using Streamlit Secrets.
     """
-    return firestore.Client.from_service_account_json("ServiceAccountKey.json")
+    key_dict = st.secrets["gcp_service_account"]
+    return firestore.Client.from_service_account_info(key_dict)
 
 
 # ---------------------------------------------
@@ -34,7 +35,7 @@ def get_user(email):
 
 
 # ---------------------------------------------
-# DATASET METADATA
+# DATASET METADATA COLLECTION
 # ---------------------------------------------
 def save_dataset_metadata(email, filename, processed=False):
     db = get_db()

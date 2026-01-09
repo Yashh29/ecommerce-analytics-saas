@@ -1,17 +1,18 @@
+import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, auth
 
-import os
-
-# Ensure Firebase Admin initializes only once
+# ----------------------------------------------------
+# Initialize Firebase Admin using Streamlit Secrets
+# ----------------------------------------------------
 if not firebase_admin._apps:
-    cred = credentials.Certificate("ServiceAccountKey.json")
+    cred = credentials.Certificate(st.secrets["gcp_service_account"])
     firebase_admin.initialize_app(cred)
 
 
-# ---------------------------
+# ----------------------------------------------------
 # SIGN UP USER
-# ---------------------------
+# ----------------------------------------------------
 def signup_user(email, password):
     try:
         user = auth.create_user(email=email, password=password)
@@ -20,23 +21,20 @@ def signup_user(email, password):
         return None
 
 
-# ---------------------------
-# LOGIN USER (email/password)
-# Firebase Admin cannot login users directly
-# So we simulate login by checking if user exists
-# ---------------------------
+# ----------------------------------------------------
+# LOGIN USER
+# (Firebase Admin CANNOT check password, so we verify email only)
+# ----------------------------------------------------
 def login_user(email, password):
     try:
-        # Firebase Admin cannot verify password!
-        # Check user exists only
         user = auth.get_user_by_email(email)
-        return user.email
+        return user.email   # return the email as the login success indicator
     except Exception:
         return None
 
 
-# ---------------------------
-# LOGOUT
-# ---------------------------
+# ----------------------------------------------------
+# LOGOUT USER
+# ----------------------------------------------------
 def logout_user():
     return True
