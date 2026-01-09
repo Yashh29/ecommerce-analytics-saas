@@ -1,10 +1,18 @@
 from google.cloud import firestore
+import json
 import streamlit as st
 
+
+# ---------------------------------------------
+# LOAD SERVICE ACCOUNT FROM STREAMLIT SECRETS
+# ---------------------------------------------
 def get_db():
-    return firestore.Client.from_service_account_info(
-        st.secrets["gcp_service_account"]
-    )
+    """
+    Load Firebase credentials from Streamlit Secrets instead of local file.
+    Works on Streamlit Cloud deployment.
+    """
+    service_account_info = st.secrets["gcp_service_account"]
+    return firestore.Client.from_service_account_info(service_account_info)
 
 
 
@@ -30,7 +38,7 @@ def get_user(email):
 
 
 # ---------------------------------------------
-# DATASET METADATA COLLECTION
+# DATASET METADATA
 # ---------------------------------------------
 def save_dataset_metadata(email, filename, processed=False):
     db = get_db()
