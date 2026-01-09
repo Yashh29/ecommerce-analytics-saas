@@ -1,16 +1,11 @@
-import streamlit as st
 from google.cloud import firestore
+import streamlit as st
 
-
-# ---------------------------------------------
-# GET FIRESTORE CLIENT (using Streamlit Secrets)
-# ---------------------------------------------
 def get_db():
-    """
-    Create Firestore client using Streamlit Secrets.
-    """
-    key_dict = st.secrets["gcp_service_account"]
-    return firestore.Client.from_service_account_info(key_dict)
+    return firestore.Client.from_service_account_info(
+        st.secrets["gcp_service_account"]
+    )
+
 
 
 # ---------------------------------------------

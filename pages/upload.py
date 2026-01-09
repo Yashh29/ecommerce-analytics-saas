@@ -1,35 +1,27 @@
 import streamlit as st
 import pandas as pd
-import firebase_admin
-from firebase_admin import credentials, storage
+from firebase_admin import storage
 from core.db import save_dataset_metadata
 
 
-# ----------------------------------------------------
-# Initialize Firebase (using Streamlit Secrets)
-# ----------------------------------------------------
-if not firebase_admin._apps:
-    cred = credentials.Certificate(st.secrets["gcp_service_account"])
-    firebase_admin.initialize_app(cred, {
-        "storageBucket": "ecommerce-analytics-saas-f2a2f.appspot.com"
-    })
-
-
-# ----------------------------------------------------
+# ---------------------------------------------
 # Redirect if not logged in
-# ----------------------------------------------------
+# ---------------------------------------------
 if "user" not in st.session_state or st.session_state["user"] is None:
-    st.switch_page("pages/login.py")
+    st.switch_page("login.py")
 
 
-# ----------------------------------------------------
-# File Upload Function
-# ----------------------------------------------------
+st.set_page_config(page_title="Upload Data — SaaS Platform")
+
+
+# ---------------------------------------------
+# Upload CSV → Firebase + Save Metadata
+# ---------------------------------------------
 def upload_user_file(user_email):
     st.title("📤 Upload Your E-Commerce Data")
 
     uploaded_file = st.file_uploader(
-        "Upload Orders CSV (orders.csv only)",
+        "Upload Orders CSV (file name must be orders.csv)",
         type=["csv"]
     )
 
@@ -37,37 +29,43 @@ def upload_user_file(user_email):
         df = pd.read_csv(uploaded_file)
         st.success("File uploaded successfully!")
 
-        # ------------------------------------------------
-        # Save file to Firebase Storage (raw data)
-        # ------------------------------------------------
-        bucket = storage.bucket()
-        blob = bucket.blob(f"{user_email}/raw/orders.csv")
+        # ---------------------------------------------
+        # Upload to Firebase Storage
+        # ---------------------------------------------
+        try:
+            bucket = storage.bucket()
+            blob = bucket.blob(f"{user_email}/raw/orders.csv")
 
-        blob.upload_from_string(
-            uploaded_file.getvalue(),
-            content_type='text/csv'
-        )
+            blob.upload_from_string(
+                uploaded_file.getvalue(),
+                content_type="text/csv"
+            )
 
-        st.info("Your file has been securely saved to cloud storage.")
+            st.info("📦 Your dataset was saved to Firebase Storage.")
 
-        # ------------------------------------------------
-        # Save metadata to Firestore
-        # ------------------------------------------------
-        save_dataset_metadata(
-            email=user_email,
-            filename="orders.csv",
-            processed=False
-        )
+        except Exception as e:
+            st.error(f"Storage error: {e}")
+            return None
 
-        st.success("Metadata saved to your SaaS workspace.")
+        # ---------------------------------------------
+        # Save metadata → Firestore
+        # ---------------------------------------------
+        try:
+            save_dataset_metadata(
+                email=user_email,
+                filename="orders.csv",
+                processed=False
+            )
+            st.success("📝 Metadata saved to Firestore.")
+
+        except Exception as e:
+            st.error(f"Metadata error: {e}")
 
         return df
 
     return None
 
 
-# ----------------------------------------------------
 # MAIN EXECUTION
-# ----------------------------------------------------
 user_email = st.session_state["user"]
 upload_user_file(user_email)
