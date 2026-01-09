@@ -178,3 +178,7 @@ __marimo__/
 # KEEP THESE SAFE FILES IGNORED
 *.env
 __pycache__/
+
+core/keys/
+ServiceAccountKey.json
+
